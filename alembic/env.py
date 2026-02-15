@@ -1,4 +1,6 @@
 import os
+import time
+import logging
 from logging.config import fileConfig
 
 from alembic import context
@@ -6,6 +8,8 @@ from sqlalchemy import engine_from_config, pool
 
 from app.db.base import Base
 import app.models  # noqa: F401 — import all models so metadata is populated
+
+logger = logging.getLogger("alembic.env")
 
 config = context.config
 
@@ -17,9 +21,12 @@ target_metadata = Base.metadata
 # Override URL from environment if available
 db_url = os.environ.get("DATABASE_URL")
 if db_url:
-    # Alembic uses sync driver
+    # Render provides postgres:// but SQLAlchemy 2.0 requires postgresql://
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
+    # Strip any async driver prefix — Alembic uses sync psycopg2
+    if "+asyncpg" in db_url:
+        db_url = db_url.replace("postgresql+asyncpg://", "postgresql://", 1)
     config.set_main_option("sqlalchemy.url", db_url)
 
 
@@ -41,10 +48,31 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-    with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
-        with context.begin_transaction():
-            context.run_migrations()
+
+    # Retry logic: database may not be ready on first deploy (Render cold start)
+    retries = 5
+    for attempt in range(retries):
+        try:
+            with connectable.connect() as connection:
+                context.configure(
+                    connection=connection, target_metadata=target_metadata
+                )
+                with context.begin_transaction():
+                    context.run_migrations()
+            return
+        except Exception as e:
+            if attempt < retries - 1:
+                wait = 2 ** (attempt + 1)
+                logger.warning(
+                    "DB connection failed (attempt %d/%d), retrying in %ds: %s",
+                    attempt + 1,
+                    retries,
+                    wait,
+                    e,
+                )
+                time.sleep(wait)
+            else:
+                raise
 
 
 if context.is_offline_mode():

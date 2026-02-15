@@ -4,7 +4,9 @@ from app.core.config import settings
 
 # Convert postgres:// to postgresql+asyncpg://
 _url = settings.DATABASE_URL
-if _url.startswith("postgres://"):
+if _url.startswith("postgresql+asyncpg://"):
+    pass  # already correct
+elif _url.startswith("postgres://"):
     _url = _url.replace("postgres://", "postgresql+asyncpg://", 1)
 elif _url.startswith("postgresql://"):
     _url = _url.replace("postgresql://", "postgresql+asyncpg://", 1)
