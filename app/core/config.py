@@ -6,8 +6,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "BorrowBook"
     DEBUG: bool = False
 
-    # Database
+    # Database — prefer internal URL on Render (paid plans), fall back to external
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/borrowbook"
+    DATABASE_INTERNAL_URL: Optional[str] = None
 
     # JWT
     SECRET_KEY: str = "change-me-in-production"
@@ -36,6 +37,12 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+
+    @property
+    def effective_database_url(self) -> str:
+        """Use internal URL if available (Render paid), else external."""
+        url = self.DATABASE_INTERNAL_URL or self.DATABASE_URL
+        return url.strip() if url else self.DATABASE_URL
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

@@ -19,7 +19,8 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # Override URL from environment if available
-db_url = os.environ.get("DATABASE_URL")
+# Prefer internal URL on Render (faster, paid plans), fall back to external
+db_url = (os.environ.get("DATABASE_INTERNAL_URL") or "").strip() or os.environ.get("DATABASE_URL")
 if db_url:
     # Render provides postgres:// but SQLAlchemy 2.0 requires postgresql://
     if db_url.startswith("postgres://"):

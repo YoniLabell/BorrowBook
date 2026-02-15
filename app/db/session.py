@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.core.config import settings
 
 # Convert postgres:// to postgresql+asyncpg://
-_url = settings.DATABASE_URL
+_url = settings.effective_database_url
 if _url.startswith("postgresql+asyncpg://"):
     pass  # already correct
 elif _url.startswith("postgres://"):
