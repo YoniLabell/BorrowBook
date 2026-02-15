@@ -38,11 +38,21 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
+    # Sentinel used when no real DB URL is available (first Render deploy)
+    _FALLBACK_DB_URL = "postgresql+asyncpg://localhost/borrowbook"
+
     @property
     def effective_database_url(self) -> str:
-        """Use internal URL if available (Render paid), else external."""
-        url = self.DATABASE_INTERNAL_URL or self.DATABASE_URL
-        return url.strip() if url else self.DATABASE_URL
+        """Use internal URL if available (Render paid), else external.
+
+        Returns a valid-looking URL even when DATABASE_URL is empty so the
+        app can start (health check passes).  Actual DB calls will fail
+        until a real URL is set and the service is redeployed.
+        """
+        for candidate in (self.DATABASE_INTERNAL_URL, self.DATABASE_URL):
+            if candidate and candidate.strip():
+                return candidate.strip()
+        return self._FALLBACK_DB_URL
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

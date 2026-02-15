@@ -7,9 +7,10 @@ databases:
 services:
   - type: web
     name: borrowbook-api
-    runtime: docker
+    runtime: python
     plan: free
-    dockerfilePath: ./Dockerfile
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./start.sh
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -23,6 +24,8 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: "*"
+      - key: PYTHON_VERSION
+        value: "3.11.11"
       - key: S3_ENDPOINT_URL
         sync: false
       - key: S3_ACCESS_KEY_ID
