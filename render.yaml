@@ -1,0 +1,34 @@
+databases:
+  - name: borrowbook-db
+    plan: free
+    databaseName: borrowbook
+    user: borrowbook
+
+services:
+  - type: web
+    name: borrowbook-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: borrowbook-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: S3_ENDPOINT_URL
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_BUCKET_NAME
+        value: borrowbook
+      - key: S3_PUBLIC_URL
+        sync: false
+      - key: OCR_SPACE_API_KEY
+        sync: false
+    healthCheckPath: /health
