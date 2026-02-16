@@ -22,7 +22,8 @@ class User(Base):
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     about: Mapped[str | None] = mapped_column(Text, nullable=True)
     privacy_setting: Mapped[PrivacySetting] = mapped_column(
-        Enum(PrivacySetting), default=PrivacySetting.APPROXIMATE
+        Enum(PrivacySetting, values_callable=lambda e: [x.value for x in e]),
+        default=PrivacySetting.APPROXIMATE,
     )
     latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
