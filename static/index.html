@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BorrowBook</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ─── Top bar ──────────────────────────────────────────── -->
+<header id="topbar">
+  <div class="topbar-left" onclick="navigate('discover')">
+    <span class="logo">📚</span> <span class="logo-text">BorrowBook</span>
+  </div>
+  <div class="topbar-right" id="topbar-right"></div>
+</header>
+
+<!-- ─── Main content area ────────────────────────────────── -->
+<main id="app"></main>
+
+<!-- ─── Bottom nav (shown when logged in) ────────────────── -->
+<nav id="bottomnav" class="hidden">
+  <button data-tab="discover" class="active" onclick="navigate('discover')">
+    <span class="nav-icon">🔍</span><span>Discover</span>
+  </button>
+  <button data-tab="my-listings" onclick="navigate('my-listings')">
+    <span class="nav-icon">📖</span><span>My Books</span>
+  </button>
+  <button data-tab="requests" onclick="navigate('requests')">
+    <span class="nav-icon">📨</span><span>Requests</span>
+  </button>
+  <button data-tab="transactions" onclick="navigate('transactions')">
+    <span class="nav-icon">🤝</span><span>Deals</span>
+  </button>
+  <button data-tab="chat" onclick="navigate('chat')">
+    <span class="nav-icon">💬</span><span>Chat</span>
+  </button>
+</nav>
+
+<!-- ─── Toast container ──────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
